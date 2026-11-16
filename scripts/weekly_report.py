@@ -15,7 +15,10 @@ import subprocess
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
+
+IST = ZoneInfo("Asia/Kolkata")  # commits arrive with mixed offsets; report them all in IST
 
 AREAS = {
     "src/": "Model and pipeline code",
@@ -89,7 +92,7 @@ def collect(since: str | None = None) -> list[Commit]:
             continue
         head, _, body = block.partition("\n")
         sha, when, author, subject = head.split("|", 3)
-        c = Commit(sha=sha[:7], when=datetime.fromisoformat(when), author=author, subject=subject)
+        c = Commit(sha=sha[:7], when=datetime.fromisoformat(when).astimezone(IST), author=author, subject=subject)
         for line in body.splitlines():
             parts = line.split("\t")
             if len(parts) != 3:
